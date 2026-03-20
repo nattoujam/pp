@@ -175,6 +175,7 @@ case "$cmd" in
         url="${PIPING_SERVER}/${code}"
 
         tmp="$(mktemp)" || exit 1
+        trap 'rm -f "$tmp"' EXIT HUP INT TERM
         curl $CURL_PROGRESS "$url" -o "$tmp"
         magic=$(dd if="$tmp" bs=4 count=1 2>/dev/null | od -A n -t x1 | tr -d ' \n')
         if [ "$magic" = "$PP_MAGIC_HEX" ]; then
