@@ -160,10 +160,10 @@ case "$cmd" in
             if is_already_compressed "$file"; then
                 curl $CURL_PROGRESS -T "$file" "$url"
             else
-                { printf 'PPZ\0'; gzip -c "$file"; } | curl $CURL_PROGRESS -T - "$url"
+                { printf 'PPZ\000'; gzip -c "$file"; } | curl $CURL_PROGRESS -T - "$url"
             fi
         else
-            { printf 'PPZ\0'; gzip -c; } | curl $CURL_PROGRESS -T - "$url"
+            { printf 'PPZ\000'; gzip -c; } | curl $CURL_PROGRESS -T - "$url"
         fi
         ;;
 
