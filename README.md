@@ -91,6 +91,7 @@ pp --version
 ## Requirements
 
 - curl
+- gzip
 
 ## Security Notes
 

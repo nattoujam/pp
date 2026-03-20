@@ -44,6 +44,23 @@ def test_send_receive_binary(server_url, unique_code):
     assert recv.stdout == data
 
 
+def test_send_compressed_file_not_double_compressed(server_url, unique_code, tmp_path):
+    import gzip
+    original = b'content to compress'
+    gz_file = tmp_path / 'data.gz'
+    gz_file.write_bytes(gzip.compress(original))
+    gz_bytes = gz_file.read_bytes()
+
+    send, recv = run_pp_concurrent(
+        send_args=['s', unique_code, '-f', str(gz_file)],
+        recv_args=['r', unique_code],
+        server=server_url,
+    )
+    assert send.returncode == 0
+    assert recv.returncode == 0
+    assert recv.stdout == gz_bytes  # .gz ファイルはそのまま転送される
+
+
 # ===== error handling =====
 
 
