@@ -41,7 +41,8 @@ error() {
 }
 
 is_already_compressed() {
-    case "$1" in
+    file_lower=$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')
+    case "$file_lower" in
         *.gz|*.bz2|*.xz|*.zst|*.zip|*.7z|*.rar|\
         *.jpg|*.jpeg|*.png|*.gif|*.webp|\
         *.mp4|*.mkv|*.mov|*.avi|*.webm|\
