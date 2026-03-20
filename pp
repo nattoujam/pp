@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION="1.0.0"
+VERSION="1.0.1"
 REPO_RAW="https://raw.githubusercontent.com/nattoujam/pp/refs/heads/master/pp"
 DEFAULT_SERVER="https://ppng.io"
 
@@ -111,8 +111,10 @@ case "$cmd" in
 
     if [ -w "$target" ]; then
         mv "$tmp" "$target"
+        chmod 755 $target
     else
         sudo mv "$tmp" "$target"
+        sudo chmod 755 $target
     fi
 
     echo "Update complete."
