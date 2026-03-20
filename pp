@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION="0.1.0"
+VERSION="1.0.0"
 REPO_RAW="https://raw.githubusercontent.com/nattoujam/pp/refs/heads/master/pp"
 DEFAULT_SERVER="https://ppng.io"
 
@@ -39,6 +39,21 @@ error() {
     echo "pp: $1" >&2
     exit 1
 }
+
+is_already_compressed() {
+    file_lower=$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')
+    case "$file_lower" in
+        *.gz|*.bz2|*.xz|*.zst|*.zip|*.7z|*.rar|\
+        *.jpg|*.jpeg|*.png|*.gif|*.webp|\
+        *.mp4|*.mkv|*.mov|*.avi|*.webm|\
+        *.mp3|*.aac|*.flac|*.ogg|\
+        *.pdf)
+            return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+PP_MAGIC_HEX="50505a00"
 
 # ===== curl settings =====
 if [ -t 2 ]; then
@@ -143,9 +158,13 @@ case "$cmd" in
             file="$1"
             [ ! -f "$file" ] && error "file not found"
 
-            curl $CURL_PROGRESS -T "$file" "$url"
+            if is_already_compressed "$file"; then
+                curl $CURL_PROGRESS -T "$file" "$url"
+            else
+                { printf 'PPZ\000'; gzip -c "$file"; } | curl $CURL_PROGRESS -T - "$url"
+            fi
         else
-            curl $CURL_PROGRESS -T - "$url"
+            { printf 'PPZ\000'; gzip -c; } | curl $CURL_PROGRESS -T - "$url"
         fi
         ;;
 
@@ -155,7 +174,16 @@ case "$cmd" in
 
         url="${PIPING_SERVER}/${code}"
 
-        curl $CURL_PROGRESS "$url"
+        tmp="$(mktemp)" || exit 1
+        trap 'rm -f "$tmp"' EXIT HUP INT TERM
+        curl $CURL_PROGRESS "$url" -o "$tmp"
+        magic=$(dd if="$tmp" bs=4 count=1 2>/dev/null | od -A n -t x1 | tr -d ' \n')
+        if [ "$magic" = "$PP_MAGIC_HEX" ]; then
+            dd if="$tmp" bs=4 skip=1 2>/dev/null | gunzip
+        else
+            cat "$tmp"
+        fi
+        rm -f "$tmp"
         ;;
 
     *)
