@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION="1.0.1"
+VERSION="1.0.2"
 REPO_RAW="https://raw.githubusercontent.com/nattoujam/pp/refs/heads/master/pp"
 DEFAULT_SERVER="https://ppng.io"
 

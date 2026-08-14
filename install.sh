@@ -2,25 +2,23 @@
 set -eu
 
 REPO_RAW="https://raw.githubusercontent.com/nattoujam/pp/refs/heads/master/pp"
-INSTALL_PATH="/usr/local/bin/pp"
+BIN_DIR="$HOME/.local/bin"
 
 command -v curl >/dev/null 2>&1 || {
     echo "curl is required."
     exit 1
 }
 
+mkdir -p "$BIN_DIR"
+
 tmp="$(mktemp)"
-
-echo "Downloading pp..."
 curl -fsSL "$REPO_RAW" -o "$tmp"
+chmod 0755 "$tmp"
+mv "$tmp" "$BIN_DIR/pp"
 
-chmod +x "$tmp"
+echo "installed: $BIN_DIR/pp"
 
-if [ -w "$(dirname "$INSTALL_PATH")" ]; then
-    mv "$tmp" "$INSTALL_PATH"
-else
-    sudo mv "$tmp" "$INSTALL_PATH"
-fi
-
-echo "Installed to $INSTALL_PATH"
-echo "Run: pp --version"
+case ":$PATH:" in
+    *":$BIN_DIR:"*) ;;
+    *) echo "warning: $BIN_DIR is not in your PATH. Add it to your shell profile." ;;
+esac
